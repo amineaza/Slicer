@@ -1,4 +1,4 @@
-#fixes the "use DICOM image" error while using the non CLI version of Aorway segmentation module
+#fixes the "use DICOM image" error while using the non CLI version of Airway segmentation module
 #make a backup of the file Slicer_install_dir\lib\Slicer-4.10\qt-scripted-modules\AirwaySegmentation.py
 #then replace it with this one
 #all credits for this module go back to the original authors
