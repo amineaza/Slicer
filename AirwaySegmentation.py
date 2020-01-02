@@ -1,6 +1,7 @@
 #fixes the "use DICOM image" error while using the non CLI version of Aorway segmentation module
 #make a backup of the file Slicer_install_dir\lib\Slicer-4.10\qt-scripted-modules\AirwaySegmentation.py
 #then replace it with this one
+#all credits for this module go back to the original authors
 
 import os
 import unittest
@@ -234,21 +235,38 @@ class AirwaySegmentationLogic:
         self.labelValue = labelValue
         
         try:
-            volumeName = inputVolume.GetName()
-            #n = slicer.util.getNode(volumeName)
-            #instUIDs = n.GetAttribute('DICOM.instanceUIDs').split()
-            #fileName = slicer.dicomDatabase.fileForInstance(instUIDs[0])
-            #convolutionKernel = slicer.dicomDatabase.fileValue(fileName, '0018,1210')
-            airwaySegmentationModule = slicer.modules.airwaysegmentationcli
-            parameters = {
-                "inputVolume": inputVolume.GetID(),
-                "reconstructionKernelType": "conv",
-                "label": outputVolume.GetID(),
-                "seed": fiducialsList.GetID(),
-                "labelValue": labelValue,
-            }
-            self.delayDisplay('Running the algorithm')
-            slicer.cli.run(airwaySegmentationModule, None, parameters, wait_for_completion=True)
+            try:
+                volumeName = inputVolume.GetName()
+                n = slicer.util.getNode(volumeName)
+                instUIDs = n.GetAttribute('DICOM.instanceUIDs').split()
+                fileName = slicer.dicomDatabase.fileForInstance(instUIDs[0])
+                convolutionKernel = slicer.dicomDatabase.fileValue(fileName, '0018,1210')
+                airwaySegmentationModule = slicer.modules.airwaysegmentationcli
+                parameters = {
+                    "inputVolume": inputVolume.GetID(),
+                    "reconstructionKernelType": convolutionKernel,
+                    "label": outputVolume.GetID(),
+                    "seed": fiducialsList.GetID(),
+                    "labelValue": labelValue,
+                }
+                self.delayDisplay('Running the algorithm')
+                slicer.cli.run(airwaySegmentationModule, None, parameters, wait_for_completion=True)
+            except:
+                volumeName = inputVolume.GetName()
+                # n = slicer.util.getNode(volumeName)
+                # instUIDs = n.GetAttribute('DICOM.instanceUIDs').split()
+                # fileName = slicer.dicomDatabase.fileForInstance(instUIDs[0])
+                # convolutionKernel = slicer.dicomDatabase.fileValue(fileName, '0018,1210')
+                airwaySegmentationModule = slicer.modules.airwaysegmentationcli
+                parameters = {
+                    "inputVolume": inputVolume.GetID(),
+                    "reconstructionKernelType": "STANDARD",
+                    "label": outputVolume.GetID(),
+                    "seed": fiducialsList.GetID(),
+                    "labelValue": labelValue,
+                }
+                self.delayDisplay('Running the algorithm')
+                slicer.cli.run(airwaySegmentationModule, None, parameters, wait_for_completion=True)
         except Exception:
             import traceback
             traceback.print_exc()
@@ -359,3 +377,4 @@ class AirwaySegmentationTest(unittest.TestCase):
         logic = AirwaySegmentationLogic()
         self.assertTrue(logic.hasImageData(volumeNode))
         self.delayDisplay('Test passed!')
+
